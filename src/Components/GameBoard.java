@@ -2,10 +2,7 @@ package Components;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.util.Random;
 
 public class GameBoard extends JPanel implements ActionListener {
@@ -18,24 +15,38 @@ public class GameBoard extends JPanel implements ActionListener {
     private final int[] x = new int[gameUnits];
     private final int[] y = new int[gameUnits];
 
-    private int bodyParts = 10;
+    private int bodyParts = 3;
     private int applesEaten;
     private int appleX;
     private int appleY;
 
     private Directions direction = Directions.RIGHT;
     private boolean running = false;
+    private boolean isMenu = true;
+    private boolean isChangingDirection = false;
 
     Timer timer;
     Random random;
+
+    JButton startButton;
+
 
     public GameBoard() {
         random = new Random();
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
         this.setBackground(Color.CYAN);
-        this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
-        startGame();
+        this.setFocusable(true);
+        startButton = new JButton("Click to start!");
+        this.add(startButton, "Center");
+        startButton.addActionListener(e -> {
+            if (e.getSource() == startButton) {
+                isMenu = false;
+                System.out.println("action performed works!");
+                this.remove(startButton);
+                startGame();
+            }
+        });
     }
 
     public void startGame(){
@@ -64,12 +75,12 @@ public class GameBoard extends JPanel implements ActionListener {
                     g.setColor(Color.GREEN);
                     g.fillRect(x[i], y[i], unitSize, unitSize);
                 } else {
-                    g.setColor(new Color(45, 180, 0));
+                    g.setColor(new Color((int)(Math.random()*255),(int)(Math.random()*255),(int)(Math.random()*255)));
                     g.fillRect(x[i], y[i], unitSize, unitSize);
                 }
             }
         }
-        else {
+        else if (!isMenu && !running){
             gameOver(g);
         }
     }
@@ -92,12 +103,14 @@ public class GameBoard extends JPanel implements ActionListener {
             y[i] = y[i-1];
         }
 
+
         switch (direction){
             case UP -> y[0] = y[0] - unitSize;
             case DOWN -> y[0] = y[0] + unitSize;
             case LEFT -> x[0] = x[0] - unitSize;
             case RIGHT -> x[0] = x[0] + unitSize;
         }
+        isChangingDirection = false;
     }
 
     public void checkApple(){
@@ -138,21 +151,27 @@ public class GameBoard extends JPanel implements ActionListener {
     public class MyKeyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
-            switch (e.getKeyCode()){
-                case KeyEvent.VK_LEFT:
-                    if (direction != Directions.RIGHT) direction = Directions.LEFT;
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (direction != Directions.LEFT) direction = Directions.RIGHT;
-                    break;
-                case KeyEvent.VK_UP:
-                    if (direction != Directions.DOWN) direction = Directions.UP;
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (direction != Directions.UP) direction = Directions.DOWN;
-                    break;
+            if(!isChangingDirection) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_LEFT:
+                        if (direction != Directions.RIGHT) direction = Directions.LEFT;
+                        System.out.println("Current direction: " + direction);
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        if (direction != Directions.LEFT) direction = Directions.RIGHT;
+                        System.out.println("Current direction: " + direction);
+                        break;
+                    case KeyEvent.VK_UP:
+                        if (direction != Directions.DOWN) direction = Directions.UP;
+                        System.out.println("Current direction: " + direction);
+                        break;
+                    case KeyEvent.VK_DOWN:
+                        if (direction != Directions.UP) direction = Directions.DOWN;
+                        System.out.println("Current direction: " + direction);
+                        break;
+                }
+                isChangingDirection = true;
             }
         }
     }
-
 }
