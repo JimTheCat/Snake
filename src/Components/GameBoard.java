@@ -14,6 +14,8 @@ public class GameBoard extends JPanel implements ActionListener {
     private int delay = 150;
     private int[] x = new int[gameUnits];
     private int[] y = new int[gameUnits];
+    private int[] collisionX = new int[gameUnits/2];
+    private int[] collisionY = new int[gameUnits/2];
 
     private int bodyParts = 3;
     private int applesEaten;
@@ -85,11 +87,14 @@ public class GameBoard extends JPanel implements ActionListener {
         if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts = bodyParts == ((boardWidth * boardHeight) / 2 * unitSize) / 4 ? bodyParts : bodyParts + 1;
             applesEaten++;
+            if (applesEaten % 5 == 3 && isHardMode) newCollision();
             newApple();
         }
     }
 
     public void checkCollisions() {
+
+
         //sprawdzenie czy głowa koliduje z ciałem
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) running = false;
@@ -110,6 +115,12 @@ public class GameBoard extends JPanel implements ActionListener {
             this.add(rozmiarMapy);
             this.add(hardMode);
             isSpaceClicked = false;
+        }
+        //=-=-=-=HARDMODE=-=-=-=
+        if (isHardMode){
+            g.setColor(new Color(36, 38, 42));
+            for (int i = 0; i < collisionX.length; i++)
+                g.fillRect(collisionX[i], collisionY[i], unitSize, unitSize);
         }
         //=-=-=-=MENU_GRY=-=-=-=
         if (isMenu) {
@@ -190,6 +201,11 @@ public class GameBoard extends JPanel implements ActionListener {
         for (int i = 0; i < bodyParts; i++) {
             if ((x[i] == appleX) && (y[i] == appleY)) newApple();
         }
+    }
+
+    public void newCollision() {
+        int index = random.nextInt(unitSize,gameUnits/2);
+        //TODO: tworzenie kolizji w tej funkcji (tablice zrobione)
     }
 
     //=-=-=-=POZBYCIE_SIĘ_ARTEFAKTÓW=-=-=-=
