@@ -18,6 +18,7 @@ public class GameBoard extends JPanel implements ActionListener {
     private int[] collisionY = new int[gameUnits/2];
 
     private int bodyParts = 3;
+    private int howManyCollisions = 0;
     private int applesEaten;
     private int appleX;
     private int appleY;
@@ -87,14 +88,15 @@ public class GameBoard extends JPanel implements ActionListener {
         if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts = bodyParts == ((boardWidth * boardHeight) / 2 * unitSize) / 4 ? bodyParts : bodyParts + 1;
             applesEaten++;
-            if (applesEaten % 5 == 3 && isHardMode) newCollision();
+            if (applesEaten % 5 == 3 && isHardMode) {
+                newCollision();
+                howManyCollisions++;
+            }
             newApple();
         }
     }
 
     public void checkCollisions() {
-
-
         //sprawdzenie czy głowa koliduje z ciałem
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) running = false;
@@ -104,6 +106,10 @@ public class GameBoard extends JPanel implements ActionListener {
                 x[0] >= boardWidth - unitSize ||
                 y[0] < unitSize ||
                 y[0] >= boardHeight - unitSize) running = false;
+
+        for (int i = 0; i < howManyCollisions; i++){
+            if ((x[0] == collisionX[i]) && (y[0] == collisionY[i])) running = false;
+        }
 
         if (!running) timer.stop();
     }
@@ -115,12 +121,6 @@ public class GameBoard extends JPanel implements ActionListener {
             this.add(rozmiarMapy);
             this.add(hardMode);
             isSpaceClicked = false;
-        }
-        //=-=-=-=HARDMODE=-=-=-=
-        if (isHardMode){
-            g.setColor(new Color(36, 38, 42));
-            for (int i = 0; i < collisionX.length; i++)
-                g.fillRect(collisionX[i], collisionY[i], unitSize, unitSize);
         }
         //=-=-=-=MENU_GRY=-=-=-=
         if (isMenu) {
@@ -145,6 +145,13 @@ public class GameBoard extends JPanel implements ActionListener {
             g.setColor(Color.RED);
             g.fillOval(appleX, appleY, unitSize, unitSize);
 
+            //=-=-=-=GENEROWANIE_BLOKÓW_KOLIZYJNYCH=-=-=-=
+            if(isHardMode) {
+                g.setColor(new Color(223, 222, 222));
+                for (int i = 0; i < howManyCollisions; i++) {
+                    g.fillRect(collisionX[i], collisionY[i], unitSize, unitSize);
+                }
+            }
             //=-=-=-=GENEROWANIE_WYGLĄDU_WĘŻA=-=-=-=
             for (int i = 0; i < bodyParts; i++) {
                 if (i == 0) {
@@ -197,15 +204,19 @@ public class GameBoard extends JPanel implements ActionListener {
     public void newApple() {
         appleX = random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
         appleY = random.nextInt(1, (boardHeight / unitSize) - 1) * unitSize;
-        System.out.println("I'm inside the loop~!");
         for (int i = 0; i < bodyParts; i++) {
             if ((x[i] == appleX) && (y[i] == appleY)) newApple();
         }
     }
 
     public void newCollision() {
-        int index = random.nextInt(unitSize,gameUnits/2);
-        //TODO: tworzenie kolizji w tej funkcji (tablice zrobione)
+        int indexX = random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
+        int indexY= random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
+        collisionX[howManyCollisions] = indexX;
+        collisionY[howManyCollisions] = indexY;
+        for (int i = 0; i < bodyParts; i++) {
+            if ((x[i] == collisionX[howManyCollisions]) && (y[i] == collisionY[howManyCollisions])) newCollision();
+        }
     }
 
     //=-=-=-=POZBYCIE_SIĘ_ARTEFAKTÓW=-=-=-=
@@ -268,6 +279,8 @@ public class GameBoard extends JPanel implements ActionListener {
                 applesEaten = 0;
                 x = new int[gameUnits];
                 y = new int[gameUnits];
+                collisionX = new int[gameUnits/2];
+                collisionY = new int[gameUnits/2];
                 direction = Directions.RIGHT;
                 repaint();
             }
