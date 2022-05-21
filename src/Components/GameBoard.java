@@ -207,6 +207,9 @@ public class GameBoard extends JPanel implements ActionListener {
         for (int i = 0; i < bodyParts; i++) {
             if ((x[i] == appleX) && (y[i] == appleY)) newApple();
         }
+        for (int i = 0; i < howManyCollisions; i++){
+            if (appleX == collisionX[i] && appleY == collisionY[i]) newApple();
+        }
     }
 
     public void newCollision() {
