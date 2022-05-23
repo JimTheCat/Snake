@@ -1,8 +1,8 @@
-Czy gra musi zapisywać highscore do pliku i jaki format danych(txt, json, xml)?
+Czy gra musi zapisywać highscore do pliku i jaki format danych(txt, json, xml)? -> txt na sztywno
 
-JPanele.. przełączać się miedzy panelami czy też posiadać wszystkie informacje w jednym JPanelu?
+JPanele.. przełączać się miedzy panelami czy też posiadać wszystkie informacje w jednym JPanelu? -> jeden JPanel
 
-Rekurencja w newApple().. czy patrzymy na złożoność obliczeniową czy też nie?
+Rekurencja w newApple().. czy patrzymy na złożoność obliczeniową czy też nie? -> wywalone na złożoność
 
-Czy same komentarze ogólnikowe wystarczą czy musimy do tego zrobić dokumentacje?
+Czy same komentarze ogólnikowe wystarczą czy musimy do tego zrobić dokumentacje? -> bez komentarzy
 

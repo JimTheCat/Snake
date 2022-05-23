@@ -6,9 +6,10 @@ import java.awt.event.*;
 import java.util.Random;
 
 public class GameBoard extends JPanel implements ActionListener {
+    //=-=-=-=ZMIENNE=-=-=-=
 
-    private static final int boardWidth = 600;
-    private static final int boardHeight = 600;
+    private static final int boardWidth = 800;
+    private static final int boardHeight = 800;
     private int unitSize = 50;
     private final int gameUnits = (boardWidth * boardHeight) / 2 * unitSize;
     private int delay = 150;
@@ -84,6 +85,7 @@ public class GameBoard extends JPanel implements ActionListener {
         hardMode.addActionListener(e -> isHardMode = hardMode.isSelected());
     }
 
+    //=-=-=-=SPRAWDZANIE_JABŁKA_CZY_ZEBRANE=-=-=-=
     public void checkApple() {
         if ((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts = bodyParts == ((boardWidth * boardHeight) / 2 * unitSize) / 4 ? bodyParts : bodyParts + 1;
@@ -96,17 +98,18 @@ public class GameBoard extends JPanel implements ActionListener {
         }
     }
 
+    //=-=-=-=SPRAWDZANIE_KOLIZJI=-=-=-=
     public void checkCollisions() {
-        //sprawdzenie czy głowa koliduje z ciałem
+        //=-=-=-=CIAŁO=-=-=-=
         for (int i = bodyParts; i > 0; i--) {
             if ((x[0] == x[i]) && (y[0] == y[i])) running = false;
         }
-        //kolizja z borderem
+        //=-=-=-=OKNO=-=-=-=
         if (x[0] < unitSize ||
                 x[0] >= boardWidth - unitSize ||
                 y[0] < unitSize ||
                 y[0] >= boardHeight - unitSize) running = false;
-
+        //=-=-=-=HARDMODE=-=-=-=
         for (int i = 0; i < howManyCollisions; i++){
             if ((x[0] == collisionX[i]) && (y[0] == collisionY[i])) running = false;
         }
@@ -114,8 +117,9 @@ public class GameBoard extends JPanel implements ActionListener {
         if (!running) timer.stop();
     }
 
+    //=-=-=-=RYSOWANIE_OBIEKTÓW=-=-=-=
     public void draw(Graphics g) {
-        //===DODANIE GUZIKÓW DO MENU PO RESTARCIE GRY===
+        //=-=-=-=DODANIE_GUZIKÓW_DO_MENU_PO_RESTARCIE_GRY=-=-=-=
         if (isSpaceClicked) {
             this.add(startButton);
             this.add(rozmiarMapy);
@@ -154,13 +158,8 @@ public class GameBoard extends JPanel implements ActionListener {
             }
             //=-=-=-=GENEROWANIE_WYGLĄDU_WĘŻA=-=-=-=
             for (int i = 0; i < bodyParts; i++) {
-                if (i == 0) {
-                    g.setColor(Color.GREEN);
-                    g.fillRect(x[i], y[i], unitSize, unitSize);
-                } else {
-                    g.setColor(new Color(70, 150, 70));
-                    g.fillRect(x[i], y[i], unitSize, unitSize);
-                }
+                g.setColor(i == 0 ? Color.GREEN : new Color(70, 150, 70));
+                g.fillRect(x[i], y[i], unitSize, unitSize);
             }
 
             //=-=-=-=GENEROWANIE_WYNIKU_I_DŁUGOŚCI_WĘŻA=-=-=-=
