@@ -276,6 +276,7 @@ public class GameBoard extends JPanel implements ActionListener {
                 isChangingDirection = true;
             }
             if (!isMenu && !running && e.getKeyCode() == KeyEvent.VK_SPACE) {
+                //=-=-=-=STATYSTYKI_USTAWIANE_NA_DOMYŚLNE=-=-=-=
                 isMenu = true;
                 isSpaceClicked = true;
                 bodyParts = 3;
@@ -284,6 +285,7 @@ public class GameBoard extends JPanel implements ActionListener {
                 y = new int[gameUnits];
                 collisionX = new int[gameUnits/2];
                 collisionY = new int[gameUnits/2];
+                howManyCollisions = 0;
                 direction = Directions.RIGHT;
                 repaint();
             }
