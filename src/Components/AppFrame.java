@@ -1,7 +1,6 @@
 package Components;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class AppFrame extends JFrame {
     public AppFrame() {
