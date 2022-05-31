@@ -1,11 +1,12 @@
 package Components;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.FileNotFoundException;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 public class GameBoard extends JPanel implements ActionListener {
@@ -13,19 +14,20 @@ public class GameBoard extends JPanel implements ActionListener {
     //=-=-=-=ZMIENNE=-=-=-=
     private static final int boardWidth = 800;
     private static final int boardHeight = 800;
+    private static final String[] nameOfMap = {"Mała", "Średnia", "Duża"};
     private int unitSize = 50;
     private int gameUnits = (boardWidth/unitSize - 2) * (boardWidth/unitSize - 2);
     private int delay = 150;
+    private int lengthOfSnake = 3;
+    private int howManyCollisions = 0;
+    private int fruitsEaten;
+    private int fruitX;
+    private int fruitY;
+
     private int[] x = new int[gameUnits];
     private int[] y = new int[gameUnits];
     private int[] collisionX = new int[gameUnits/2];
     private int[] collisionY = new int[gameUnits/2];
-
-    private int lengthOfSnake = 3;
-    private int howManyCollisions = 0;
-    private int applesEaten;
-    private int appleX;
-    private int appleY;
 
     private Directions direction = Directions.RIGHT;
     private boolean running = false;
@@ -40,13 +42,21 @@ public class GameBoard extends JPanel implements ActionListener {
     JButton startButton;
     JComboBox<String> sizeOfMap;
     JCheckBox hardMode;
-    private static final String[] nazwyMap = {"Mała", "Średnia", "Duża"};
 
-    public GameBoard() {
+    //TODO: naprawić problem z ścieżką
+    BufferedImage bodyImg = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\body.png"));
+    BufferedImage headSnakeDown = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\headSnakeDown.png"));
+    BufferedImage headSnakeLeft = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\headSnakeLeft.png"));
+    BufferedImage headSnakeRight = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\headSnakeRight.png"));
+    BufferedImage headSnakeUp = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\headSnakeUp.png"));
+    BufferedImage fruit = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\apple.png"));
+    BufferedImage brick = ImageIO.read(new File("C:\\Users\\Jimmy\\Desktop\\snake2\\src\\Utils\\bricks.png"));
+
+    public GameBoard() throws IOException {
         random = new Random();
         this.setPreferredSize(new Dimension(boardWidth, boardHeight));
         this.setLayout(null);
-        this.setBackground(new Color(66, 77, 85));
+        this.setBackground(new Color(86, 143, 184));
         this.addKeyListener(new keyAdapter());
         this.setFocusable(true);
         //=-=-=-=KLIKALNE_OBIEKTY=-=-=-=
@@ -65,7 +75,7 @@ public class GameBoard extends JPanel implements ActionListener {
             }
         });
         //=-=-=-=COMBOBOX=-=-=-=
-        sizeOfMap = new JComboBox<>(nazwyMap);
+        sizeOfMap = new JComboBox<>(nameOfMap);
         sizeOfMap.setBounds((boardWidth - sizeOfMap.getPreferredSize().width - 20), (boardHeight - sizeOfMap.getPreferredSize().height - 20), 75, 25);
         sizeOfMap.addActionListener(e -> {
             if (sizeOfMap.getSelectedItem().toString().equals("Mała")) {
@@ -90,16 +100,18 @@ public class GameBoard extends JPanel implements ActionListener {
         hardMode.addActionListener(e -> isHardMode = hardMode.isSelected());
     }
 
-    //=-=-=-=SPRAWDZANIE_JABŁKA_CZY_ZEBRANE=-=-=-=
-    public void checkApple() {
-        if ((x[0] == appleX) && (y[0] == appleY)) {
+    //=-=-=-=SPRAWDZANIE_OWOCU_CZY_ZEBRANY=-=-=-=
+    public void checkFruit() {
+        if ((x[0] == fruitX) && (y[0] == fruitY)) {
             lengthOfSnake = lengthOfSnake == gameUnits / 4 ? lengthOfSnake : lengthOfSnake + 1;
-            applesEaten++;
-            if (applesEaten % 3 == 2 && isHardMode) {
+            if (fruitsEaten % 3 == 2 && isHardMode) {
                 newCollision();
                 howManyCollisions++;
+                fruitsEaten += 2;
             }
-            newApple();
+            else
+                fruitsEaten++;
+            newFruit();
         }
     }
 
@@ -155,33 +167,40 @@ public class GameBoard extends JPanel implements ActionListener {
             g.drawLine(boardWidth - unitSize, boardHeight - unitSize, unitSize, boardHeight - unitSize);
             g.drawLine(boardWidth - unitSize, boardHeight - unitSize, boardWidth - unitSize, unitSize);
 
-            //=-=-=-=GENEROWANIE_WYGLĄDU_JABŁKA=-=-=-=
-            g.setColor(Color.RED);
-            g.fillOval(appleX, appleY, unitSize, unitSize);
+            //=-=-=-=GENEROWANIE_WYGLĄDU_OWOCU=-=-=-=
+            g.drawImage(fruit, fruitX, fruitY, unitSize, unitSize, this);
 
             //=-=-=-=GENEROWANIE_BLOKÓW_KOLIZYJNYCH=-=-=-=
             if(isHardMode) {
-                g.setColor(new Color(223, 222, 222));
                 for (int i = 0; i < howManyCollisions; i++) {
-                    g.fillRect(collisionX[i], collisionY[i], unitSize, unitSize);
+                    g.drawImage(brick, collisionX[i], collisionY[i], unitSize, unitSize, this);
                 }
             }
             //=-=-=-=GENEROWANIE_WYGLĄDU_WĘŻA=-=-=-=
             for (int i = 0; i < lengthOfSnake; i++) {
-                g.setColor(i == 0 ? Color.GREEN : new Color(70, 150, 70));
-                g.fillRect(x[i], y[i], unitSize, unitSize);
+                if (i == 0){
+                    switch (direction){
+                        case RIGHT -> g.drawImage(headSnakeRight, x[i], y[i], unitSize, unitSize, this);
+                        case LEFT -> g.drawImage(headSnakeLeft, x[i], y[i], unitSize, unitSize, this);
+                        case UP -> g.drawImage(headSnakeUp, x[i], y[i], unitSize, unitSize, this);
+                        case DOWN -> g.drawImage(headSnakeDown, x[i], y[i], unitSize, unitSize, this);
+                    }
+                }
+                else {
+                    g.drawImage(bodyImg, x[i], y[i], unitSize, unitSize, this);
+                }
             }
 
             //=-=-=-=GENEROWANIE_WYNIKU_I_DŁUGOŚCI_WĘŻA=-=-=-=
             g.setColor(new Color(240, 240, 240));
             g.setFont(new Font("Consolas", Font.BOLD, 20));
             FontMetrics metricsScore = getFontMetrics(g.getFont());
-            g.drawString("Score: " + applesEaten + "/" + file.result(), 10, boardHeight - (metricsScore.stringWidth("Score: " + applesEaten + "/" + file.result())) / 10);
+            g.drawString("Score: " + fruitsEaten + "/" + file.result(), 10, boardHeight - (metricsScore.stringWidth("Score: " + fruitsEaten + "/" + file.result())) / 10);
             g.drawString("Length: " + lengthOfSnake + "/" + gameUnits/4, boardWidth - (metricsScore.stringWidth("Length: " + lengthOfSnake + "/" + gameUnits/4)) - 10, boardHeight - 10);
         }
         //=-=-=-=GAME_OVER=-=-=-=
         if (!isMenu && !running) {
-            file.changingHighScore(applesEaten);
+            file.changingHighScore(fruitsEaten);
             g.setColor(new Color(240, 240, 240));
             g.setFont(new Font("Consolas", Font.BOLD, 75));
             FontMetrics metrics1 = getFontMetrics(g.getFont());
@@ -194,6 +213,8 @@ public class GameBoard extends JPanel implements ActionListener {
             g.drawString("Nacisnij spacje by zacząć od nowa", (boardWidth - metrics2.stringWidth("Nacisnij spacje by zacząć od nowa")) / 2, boardHeight - 100);
         }
     }
+
+    //=-=-=-=POWIEKSZANIE_SNAKEA_I_ZMIANA_DIRECTION=-=-=-=
     public void move() {
         for (int i = lengthOfSnake; i > 0; i--) {
             x[i] = x[i - 1];
@@ -209,17 +230,19 @@ public class GameBoard extends JPanel implements ActionListener {
         isChangingDirection = false;
     }
 
-    public void newApple() {
-        appleX = random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
-        appleY = random.nextInt(1, (boardHeight / unitSize) - 1) * unitSize;
+    //=-=-=-=TWORZENIE_OWOCU=-=-=-=
+    public void newFruit() {
+        fruitX = random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
+        fruitY = random.nextInt(1, (boardHeight / unitSize) - 1) * unitSize;
         for (int i = 0; i < lengthOfSnake; i++) {
-            if ((x[i] == appleX) && (y[i] == appleY)) newApple();
+            if ((x[i] == fruitX) && (y[i] == fruitY)) newFruit();
         }
         for (int i = 0; i < howManyCollisions; i++){
-            if (appleX == collisionX[i] && appleY == collisionY[i]) newApple();
+            if (fruitX == collisionX[i] && fruitY == collisionY[i]) newFruit();
         }
     }
 
+    //=-=-=-=TWORZENIE_KOLIZJI=-=-=-=
     public void newCollision() {
         int indexX = random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
         int indexY= random.nextInt(1, (boardWidth / unitSize) - 1) * unitSize;
@@ -243,7 +266,7 @@ public class GameBoard extends JPanel implements ActionListener {
     //=-=-=-=START_GRY=-=-=-=
     public void startGame() {
         this.requestFocus();
-        newApple();
+        newFruit();
         System.out.println("Zmieniam running na true");
         running = true;
         x[0] = unitSize;
@@ -257,12 +280,13 @@ public class GameBoard extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (running) {
             move();
-            checkApple();
+            checkFruit();
             checkCollisions();
         }
         repaint();
     }
 
+    //=-=-=-=KEY_ADAPTER=-=-=-=
     public class keyAdapter extends KeyAdapter {
         @Override
         public void keyPressed(KeyEvent e) {
@@ -292,7 +316,7 @@ public class GameBoard extends JPanel implements ActionListener {
                 isMenu = true;
                 isSpaceClicked = true;
                 lengthOfSnake = 3;
-                applesEaten = 0;
+                fruitsEaten = 0;
                 x = new int[gameUnits];
                 y = new int[gameUnits];
                 collisionX = new int[gameUnits/2];

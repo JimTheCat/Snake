@@ -1,9 +1,10 @@
 package Components;
 
 import javax.swing.*;
+import java.io.IOException;
 
 public class AppFrame extends JFrame {
-    public AppFrame() {
+    public AppFrame() throws IOException {
         this.add(new GameBoard());
         this.setTitle("Snake s25256");
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
